@@ -2,10 +2,14 @@ import requests
 import pandas as pd
 import json
 from datetime import datetime
+import re
 
-
+def format_player_name(player_name):
+    name = player_name.strip()
+    name = re.sub(r"(?<=[a-z])(?=[A-Z])", " ", name)
+    return "".join(word.capitalize() for word in name.split())
 def download_player_data(player_name):
-    name = "".join(word.capitalize() for word in player_name.split())
+    name = format_player_name(player_name)
     url = f"https://www.tennisabstract.com/jsmatches/{name}Career.js"
 
     response = requests.get(url, timeout=60)
@@ -54,7 +58,7 @@ def get_player_data(player_name):
         "rafaelnadal": ("19860603", "male")
     }
 
-    name = player_name.replace(" ", "").lower()
+    name = format_player_name(player_name).lower()
 
     if name not in players:
         raise ValueError(f"Player information not available for '{player_name}'")

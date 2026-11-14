@@ -1,5 +1,6 @@
 import pytest
 from tennis_career.data import parse_match_data, clean_match_data
+from tennis_career.data import format_player_name
 
 
 female_js = """
@@ -46,3 +47,8 @@ def test_clean_male():
     clean = clean_match_data(df, "19860603", "male")
     assert len(clean) == 1
     assert clean.iloc[0]["OPP_AGE"] == pytest.approx(22.264, abs=0.01)
+def test_player_names():
+    assert format_player_name("Serena Williams") == "SerenaWilliams"
+    assert format_player_name("serena williams") == "SerenaWilliams"
+    assert format_player_name("SerenaWilliams") == "SerenaWilliams"
+    assert format_player_name("Rafael Nadal") == "RafaelNadal"
