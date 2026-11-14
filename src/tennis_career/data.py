@@ -48,3 +48,21 @@ def clean_match_data(df, birth_date, gender):
     df["W/L"] = df[4]
 
     return df[["DATE", "PLAYER_AGE", "OPP_AGE", "AGE_DIFF", "W/L"]].dropna()
+def get_player_data(player_name):
+    players = {
+        "serenawilliams": ("19810926", "female"),
+        "rafaelnadal": ("19860603", "male")
+    }
+
+    name = player_name.replace(" ", "").lower()
+
+    if name not in players:
+        raise ValueError(f"Player information not available for '{player_name}'")
+
+    birth_date, gender = players[name]
+
+    js_text = download_player_data(player_name)
+    df = parse_match_data(js_text)
+    clean_df = clean_match_data(df, birth_date, gender)
+
+    return clean_df

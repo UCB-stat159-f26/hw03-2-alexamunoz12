@@ -1,2 +1,1 @@
-# from .data import get_player_data
-# from .plotting import plot_player_career
+from .data import get_player_data
