@@ -15,7 +15,7 @@ def download_player_data(player_name):
 
     return response.text
 def parse_match_data(js_text):
-    start = js_text.find("[[", js_text.find("morematchmx"))
+    start = js_text.find("[", js_text.find("morematchmx"))
 
     if start == -1:
         raise ValueError("Could not find match data")
