@@ -1,8 +1,8 @@
 import requests
 import pandas as pd
 import json
-from datetime import datetime
 import re
+from datetime import datetime
 
 def format_player_name(player_name):
     name = player_name.strip()
@@ -53,20 +53,28 @@ def clean_match_data(df, birth_date, gender):
 
     return df[["DATE", "PLAYER_AGE", "OPP_AGE", "AGE_DIFF", "W/L"]].dropna()
 def get_player_data(player_name):
-    players = {
-        "serenawilliams": ("19810926", "female"),
-        "rafaelnadal": ("19860603", "male")
-    }
+    name, birth_date, gender = get_player_info(player_name)
 
-    name = format_player_name(player_name).lower()
-
-    if name not in players:
-        raise ValueError(f"Player information not available for '{player_name}'")
-
-    birth_date, gender = players[name]
-
-    js_text = download_player_data(player_name)
+    js_text = download_player_data(name)
     df = parse_match_data(js_text)
-    clean_df = clean_match_data(df, birth_date, gender)
 
-    return clean_df
+    return clean_match_data(df, birth_date, gender)
+def get_player_info(player_name):
+    name = format_player_name(player_name).lower()
+    base = "https://raw.githubusercontent.com/Aneeshers/tennis-sackmann-archive/main"
+
+    for tour, gender in [("wta", "female"), ("atp", "male")]:
+        url = f"{base}/{tour}/{tour}_players.csv"
+        players = pd.read_csv(url, dtype={"dob": "string"}, low_memory=False)
+        names = players["name_first"].fillna("") + players["name_last"].fillna("")
+        names = names.str.replace(" ", "", regex=False).str.lower()
+        match = players[names == name]
+
+        if not match.empty:
+            player = match.iloc[0]
+            if pd.isna(player["dob"]):
+                raise ValueError(f"Birth date unavailable for '{player_name}'")
+            full_name = f'{player["name_first"]} {player["name_last"]}'
+            return full_name, player["dob"], gender
+
+    raise ValueError(f"Player '{player_name}' was not found")
